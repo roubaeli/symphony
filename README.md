@@ -62,3 +62,8 @@ Any kind of contribution including creating issues or making pull requests is we
 ## License
 
 [AGPL-3.0](./LICENSE)
+
+## Build
+1. Pull in the dependencies using `npm install`.
+2. Generate required files using `npm run prebuild`.
+3. Use `gradlew` or Android Studio to proceed with building/testing.
