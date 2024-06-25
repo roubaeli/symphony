@@ -55,6 +55,7 @@ class RadioShorty(private val symphony: Symphony) {
         songIds: List<Long>,
         options: Radio.PlayOptions = Radio.PlayOptions(),
         shuffle: Boolean = false,
+        quiz: Boolean = false,
     ) {
         symphony.radio.stop(ended = false)
         if (songIds.isEmpty()) return
@@ -71,5 +72,6 @@ class RadioShorty(private val symphony: Symphony) {
         songId: Long,
         options: Radio.PlayOptions = Radio.PlayOptions(),
         shuffle: Boolean = false,
-    ) = playQueue(listOf(songId), options = options, shuffle = shuffle)
+        quiz: Boolean = false,
+    ) = playQueue(listOf(songId), options = options, shuffle = shuffle, quiz = quiz)
 }

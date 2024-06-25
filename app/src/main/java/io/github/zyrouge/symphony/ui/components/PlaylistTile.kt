@@ -206,6 +206,23 @@ fun PlaylistDropdownMenu(
                 )
             }
         )
+        // TODO: Change hardcoded text to t.QuizPlay
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(Icons.AutoMirrored.Filled.PlaylistPlay, null)
+            },
+            text = {
+                Text("Quiz play")
+            },
+            onClick = {
+                onDismissRequest()
+                context.symphony.radio.shorty.playQueue(
+                    playlist.getSortedSongIds(context.symphony),
+                    shuffle = true,
+                    quiz = true,
+                )
+            }
+        )
         DropdownMenuItem(
             leadingIcon = {
                 Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null)
