@@ -34,14 +34,17 @@ data class NowPlayingData(
     val seekForwardDuration: Int,
     val controlsLayout: NowPlayingControlsLayout,
     val lyricsLayout: NowPlayingLyricsLayout,
+    val showSongInfo: Boolean,
 )
 
 data class NowPlayingStates(
     val showLyrics: MutableStateFlow<Boolean>,
+    val showSongInfo: MutableStateFlow<Boolean>,
 )
 
 object NowPlayingDefaults {
     var showLyrics = false
+    var showSongInfo = true
 }
 
 enum class NowPlayingControlsLayout {
@@ -95,6 +98,7 @@ fun NowPlayingWithData(
     val seekForwardDuration by context.symphony.settings.seekForwardDuration.collectAsState()
     val controlsLayout by context.symphony.settings.nowPlayingControlsLayout.collectAsState()
     val lyricsLayout by context.symphony.settings.nowPlayingLyricsLayout.collectAsState()
+    val isQuiz = true
     val isViable by remember(song) {
         derivedStateOf { song != null }
     }
@@ -119,6 +123,7 @@ fun NowPlayingWithData(
             seekForwardDuration = seekForwardDuration,
             controlsLayout = controlsLayout,
             lyricsLayout = lyricsLayout,
+            showSongInfo = !isQuiz,
         )
 
         else -> null

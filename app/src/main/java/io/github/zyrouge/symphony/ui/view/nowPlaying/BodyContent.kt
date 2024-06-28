@@ -30,6 +30,8 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,15 +60,17 @@ import io.github.zyrouge.symphony.ui.helpers.Routes
 import io.github.zyrouge.symphony.ui.helpers.ViewContext
 import io.github.zyrouge.symphony.ui.view.NowPlayingControlsLayout
 import io.github.zyrouge.symphony.ui.view.NowPlayingData
+import io.github.zyrouge.symphony.ui.view.NowPlayingStates
 import io.github.zyrouge.symphony.utils.DurationFormatter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
+fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData, states: NowPlayingStates) {
     val favoriteSongIds by context.symphony.groove.playlist.favorites.collectAsState()
     val isFavorite by remember(data) {
         derivedStateOf { favoriteSongIds.contains(data.song.id) }
     }
+    val infoVisible by states.showSongInfo.collectAsState()
 
     data.run {
         Column {
@@ -82,26 +86,67 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
                 ) { targetStateSong ->
                     Column(modifier = Modifier.padding(defaultHorizontalPadding, 0.dp)) {
                         Text(
-                            targetStateSong.title,
+                            if (infoVisible) targetStateSong.title else "<Title>",
                             style = MaterialTheme.typography.headlineSmall
                                 .copy(fontWeight = FontWeight.Bold),
                             maxLines = 3,
                             overflow = TextOverflow.Ellipsis,
                         )
+//                        if (targetStateSong.artists.isNotEmpty()) {
+//                            FlowRow {
+//                                targetStateSong.artists.forEachIndexed { i, it ->
+//                                    Text(
+//                                        it,
+//                                        maxLines = 2,
+//                                        overflow = TextOverflow.Ellipsis,
+//                                        modifier = Modifier.pointerInput(Unit) {
+//                                            detectTapGestures { _ ->
+//                                                context.navController.navigate(
+//                                                    Routes.Artist.build(it)
+//                                                )
+//                                            }
+//                                        },
+//                                    )
+//                                    if (i != targetStateSong.artists.size - 1) {
+//                                        Text(", ")
+//                                    }
+//                                }
+//                            }
+//                        }
+//                        if (targetStateSong.album!!.isNotEmpty()) {
+//                            val localContentColor = LocalContentColor.current
+//                            Text(
+//                                targetStateSong.album,
+//                                style = MaterialTheme.typography.labelSmall
+//                                    .copy(color = localContentColor.copy(alpha = 0.7f)),
+//                                modifier = Modifier.padding(top = 4.dp),
+//                            )
+//                        }
+                        if (targetStateSong.album!!.isNotEmpty()) {
+                            Text(
+                                if (infoVisible) targetStateSong.album else "<Album>",
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier,
+                            )
+                        }
                         if (targetStateSong.artists.isNotEmpty()) {
+                            val localContentColor = LocalContentColor.current
                             FlowRow {
                                 targetStateSong.artists.forEachIndexed { i, it ->
                                     Text(
-                                        it,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.pointerInput(Unit) {
-                                            detectTapGestures { _ ->
-                                                context.navController.navigate(
-                                                    Routes.Artist.build(it)
-                                                )
-                                            }
-                                        },
+                                        if (infoVisible) it else "<Artist>",
+                                        style = MaterialTheme.typography.labelSmall
+                                            .copy(color = localContentColor.copy(alpha = 0.7f)),
+                                        modifier = Modifier
+                                            .padding(top = 4.dp)
+                                            .pointerInput(Unit) {
+                                                detectTapGestures { _ ->
+                                                    context.navController.navigate(
+                                                        Routes.Artist.build(it)
+                                                    )
+                                                }
+                                            },
                                     )
                                     if (i != targetStateSong.artists.size - 1) {
                                         Text(", ")
@@ -109,17 +154,17 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
                                 }
                             }
                         }
-                        if (data.showSongAdditionalInfo) {
-                            targetStateSong.additional.toSamplingInfoString(context.symphony)?.let {
-                                val localContentColor = LocalContentColor.current
-                                Text(
-                                    it,
-                                    style = MaterialTheme.typography.labelSmall
-                                        .copy(color = localContentColor.copy(alpha = 0.7f)),
-                                    modifier = Modifier.padding(top = 4.dp),
-                                )
-                            }
-                        }
+//                        if (data.showSongAdditionalInfo) {
+//                            targetStateSong.additional.toSamplingInfoString(context.symphony)?.let {
+//                                val localContentColor = LocalContentColor.current
+//                                Text(
+//                                    it,
+//                                    style = MaterialTheme.typography.labelSmall
+//                                        .copy(color = localContentColor.copy(alpha = 0.7f)),
+//                                    modifier = Modifier.padding(top = 4.dp),
+//                                )
+//                            }
+//                        }
                     }
                 }
                 Row {
@@ -207,6 +252,18 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
                             color = NowPlayingControlButtonColors.Surface,
                         ),
                     )
+                    // Button
+                    data.run {
+                        NowPlayingControlButton(
+                            style = NowPlayingControlButtonStyle(
+                                color = NowPlayingControlButtonColors.Surface,
+                            ),
+                            icon = if (infoVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                            onClick = {
+                                states.showSongInfo.value = !infoVisible
+                            }
+                        )
+                    }
                 }
 
                 NowPlayingControlsLayout.Traditional -> NowPlayingTraditionalControls(

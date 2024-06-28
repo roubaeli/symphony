@@ -2,6 +2,7 @@ package io.github.zyrouge.symphony.ui.view.nowPlaying
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.HideImage
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +48,7 @@ fun NowPlayingBodyCover(
     orientation: ScreenOrientation,
 ) {
     val showLyrics by states.showLyrics.collectAsState()
+    val showCover by states.showSongInfo.collectAsState()
 
     Box(modifier = Modifier.padding(defaultHorizontalPadding, 0.dp)) {
         AnimatedContent(
@@ -60,7 +64,7 @@ fun NowPlayingBodyCover(
             if (targetStateShowLyrics) {
                 NowPlayingBodyCoverLyrics(context, orientation)
             } else {
-                NowPlayingBodyCoverArtwork(context, data.song)
+                NowPlayingBodyCoverArtwork(context, data.song, showCover)
             }
         }
     }
@@ -96,7 +100,7 @@ private fun NowPlayingBodyCoverLyrics(context: ViewContext, orientation: ScreenO
 }
 
 @Composable
-private fun NowPlayingBodyCoverArtwork(context: ViewContext, song: Song) {
+private fun NowPlayingBodyCoverArtwork(context: ViewContext, song: Song, showCover: Boolean) {
     BoxWithConstraints {
         val dimension = min(maxHeight, maxWidth)
 
@@ -109,42 +113,75 @@ private fun NowPlayingBodyCoverArtwork(context: ViewContext, song: Song) {
                     .togetherWith(FadeTransition.exitTransition())
             },
         ) { targetStateSong ->
-            AsyncImage(
-                targetStateSong
-                    .createArtworkImageRequest(context.symphony)
-                    .build(),
-                null,
-                contentScale = ContentScale.Crop,
-                filterQuality = FilterQuality.High,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(12.dp))
-                    .swipeable(
-                        minimumDragAmount = 100f,
-                        onSwipeLeft = {
-                            if (context.symphony.radio.canJumpToNext()) {
-                                context.symphony.radio.jumpToNext()
-                            }
-                        },
-                        onSwipeRight = {
-                            if (context.symphony.radio.canJumpToPrevious()) {
-                                context.symphony.radio.jumpToPrevious()
-                            }
-                        },
-                    )
-                    .pointerInput(Unit) {
-                        detectTapGestures { _ ->
-                            context.symphony.groove.album
-                                .getIdFromSong(song)
-                                ?.let {
-                                    context.navController.navigate(
-                                        Routes.Album.build(it)
-                                    )
+            when (showCover) {
+                true -> AsyncImage(
+                    targetStateSong
+                        .createArtworkImageRequest(context.symphony)
+                        .build(),
+                    null,
+                    contentScale = ContentScale.Crop,
+                    filterQuality = FilterQuality.High,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(12.dp))
+                        .swipeable(
+                            minimumDragAmount = 100f,
+                            onSwipeLeft = {
+                                if (context.symphony.radio.canJumpToNext()) {
+                                    context.symphony.radio.jumpToNext()
                                 }
+                            },
+                            onSwipeRight = {
+                                if (context.symphony.radio.canJumpToPrevious()) {
+                                    context.symphony.radio.jumpToPrevious()
+                                }
+                            },
+                        )
+                        .pointerInput(Unit) {
+                            detectTapGestures { _ ->
+                                context.symphony.groove.album
+                                    .getIdFromSong(song)
+                                    ?.let {
+                                        context.navController.navigate(
+                                            Routes.Album.build(it)
+                                        )
+                                    }
+                            }
                         }
-                    }
-            )
+                )
+                false -> Image(
+                    imageVector = Icons.Filled.HideImage,
+                    null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(12.dp))
+                        .swipeable(
+                            minimumDragAmount = 100f,
+                            onSwipeLeft = {
+                                if (context.symphony.radio.canJumpToNext()) {
+                                    context.symphony.radio.jumpToNext()
+                                }
+                            },
+                            onSwipeRight = {
+                                if (context.symphony.radio.canJumpToPrevious()) {
+                                    context.symphony.radio.jumpToPrevious()
+                                }
+                            },
+                        )
+                        .pointerInput(Unit) {
+                            detectTapGestures { _ ->
+                                context.symphony.groove.album
+                                    .getIdFromSong(song)
+                                    ?.let {
+                                        context.navController.navigate(
+                                            Routes.Album.build(it)
+                                        )
+                                    }
+                            }
+                        }
+                )
+            }
         }
-
     }
 }

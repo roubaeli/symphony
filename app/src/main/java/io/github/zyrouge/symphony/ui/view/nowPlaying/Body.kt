@@ -32,6 +32,7 @@ fun NowPlayingBody(context: ViewContext, data: NowPlayingData) {
             showLyrics = MutableStateFlow(
                 data.lyricsLayout == NowPlayingLyricsLayout.ReplaceArtwork && NowPlayingDefaults.showLyrics
             ),
+            showSongInfo = MutableStateFlow(data.showSongInfo)
         )
     }
 
@@ -60,7 +61,7 @@ fun NowPlayingBody(context: ViewContext, data: NowPlayingData) {
                                     NowPlayingBodyCover(context, data, states, orientation)
                                 }
                                 Column {
-                                    NowPlayingBodyContent(context, data)
+                                    NowPlayingBodyContent(context, data, states)
                                     NowPlayingBodyBottomBar(context, data, states)
                                 }
                             }
@@ -82,7 +83,7 @@ fun NowPlayingBody(context: ViewContext, data: NowPlayingData) {
                                     Column {
                                         NowPlayingLandscapeAppBar(context)
                                         Box(modifier = Modifier.weight(1f))
-                                        NowPlayingBodyContent(context, data)
+                                        NowPlayingBodyContent(context, data, states)
                                         NowPlayingBodyBottomBar(context, data, states)
                                     }
                                 }
