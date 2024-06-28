@@ -34,6 +34,8 @@ class RadioObservatory(private val symphony: Symphony) {
     val pitch = _pitch.asStateFlow()
     private val _persistedPitch = MutableStateFlow(RadioPlayer.DEFAULT_PITCH)
     val persistedPitch = _persistedPitch.asStateFlow()
+    private val _quizMode = MutableStateFlow(false)
+    val quizMode = _quizMode.asStateFlow()
 
     fun start() {
         updateSubscriber = symphony.radio.onUpdate.subscribe { event ->
@@ -54,6 +56,7 @@ class RadioObservatory(private val symphony: Symphony) {
                 RadioEvents.QueueIndexChanged -> emitQueueIndex()
                 RadioEvents.LoopModeChanged -> emitLoopMode()
                 RadioEvents.ShuffleModeChanged -> emitShuffleMode()
+                RadioEvents.QuizModeChanged -> emitQuizMode()
                 RadioEvents.SongStaged,
                 RadioEvents.QueueEnded,
                 -> {
@@ -104,6 +107,10 @@ class RadioObservatory(private val symphony: Symphony) {
 
     private fun emitShuffleMode() = _shuffleMode.update {
         symphony.radio.queue.currentShuffleMode
+    }
+
+    private fun emitQuizMode() = _quizMode.update {
+        symphony.radio.quizMode
     }
 
     private fun emitSleepTimer() = _sleepTimer.update {

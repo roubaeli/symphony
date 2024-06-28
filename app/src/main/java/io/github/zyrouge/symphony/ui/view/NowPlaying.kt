@@ -98,7 +98,7 @@ fun NowPlayingWithData(
     val seekForwardDuration by context.symphony.settings.seekForwardDuration.collectAsState()
     val controlsLayout by context.symphony.settings.nowPlayingControlsLayout.collectAsState()
     val lyricsLayout by context.symphony.settings.nowPlayingLyricsLayout.collectAsState()
-    val isQuiz = true
+    val isQuiz by context.symphony.radio.observatory.quizMode.collectAsState()
     val isViable by remember(song) {
         derivedStateOf { song != null }
     }
