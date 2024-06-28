@@ -302,40 +302,45 @@ class Radio(private val symphony: Symphony) : SymphonyHooks {
     }
 
     private fun onSongFinish(source: SongFinishSource) {
-        stopCurrentSong()
-        if (queue.isEmpty()) {
-            queue.currentSongIndex = -1
-            return
-        }
-        var autostart: Boolean
-        var nextSongIndex: Int
-        when (queue.currentLoopMode) {
-            RadioLoopMode.Song -> {
-                nextSongIndex = queue.currentSongIndex
-                autostart = source == SongFinishSource.Finish
-                if (!queue.hasSongAt(nextSongIndex)) {
-                    nextSongIndex = 0
-                    autostart = false
-                }
+        if (!pauseOnCurrentSongEnd) {
+            stopCurrentSong()
+            if (queue.isEmpty()) {
+                queue.currentSongIndex = -1
+                return
             }
+            var autostart: Boolean
+            var nextSongIndex: Int
+            when (queue.currentLoopMode) {
+                RadioLoopMode.Song -> {
+                    nextSongIndex = queue.currentSongIndex
+                    autostart = source == SongFinishSource.Finish
+                    if (!queue.hasSongAt(nextSongIndex)) {
+                        nextSongIndex = 0
+                        autostart = false
+                    }
+                }
 
-            else -> {
-                nextSongIndex = when (source) {
-                    SongFinishSource.Finish -> queue.currentSongIndex + 1
-                    SongFinishSource.Exception -> queue.currentSongIndex
-                }
-                autostart = true
-                if (!queue.hasSongAt(nextSongIndex)) {
-                    nextSongIndex = 0
-                    autostart = queue.currentLoopMode == RadioLoopMode.Queue
+                else -> {
+                    nextSongIndex = when (source) {
+                        SongFinishSource.Finish -> queue.currentSongIndex + 1
+                        SongFinishSource.Exception -> queue.currentSongIndex
+                    }
+                    autostart = true
+                    if (!queue.hasSongAt(nextSongIndex)) {
+                        nextSongIndex = 0
+                        autostart = queue.currentLoopMode == RadioLoopMode.Queue
+                    }
                 }
             }
+            if (pauseOnCurrentSongEnd) {
+                autostart = false
+                setPauseOnCurrentSongEnd(false)
+            }
+            play(PlayOptions(nextSongIndex, autostart = autostart))
         }
-        if (pauseOnCurrentSongEnd) {
-            autostart = false
-            setPauseOnCurrentSongEnd(false)
+        else {
+            play(PlayOptions(queue.currentSongIndex, autostart = false))
         }
-        play(PlayOptions(nextSongIndex, autostart = autostart))
     }
 
     private fun requestFocus(): Boolean {
