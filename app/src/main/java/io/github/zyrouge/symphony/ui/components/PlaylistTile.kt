@@ -218,7 +218,6 @@ fun PlaylistDropdownMenu(
             },
             onClick = {
                 onDismissRequest()
-                context.symphony.radio.setQuizMode(true)
                 context.symphony.radio.shorty.playQueue(
                     playlist.getSortedSongIds(context.symphony),
                     shuffle = true,
