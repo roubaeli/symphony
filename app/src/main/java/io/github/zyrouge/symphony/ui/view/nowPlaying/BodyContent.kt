@@ -251,6 +251,7 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData, states: No
                         style = NowPlayingControlButtonStyle(
                             color = NowPlayingControlButtonColors.Surface,
                         ),
+                        states = states,
                     )
                     // Button
                     data.run {
@@ -269,6 +270,7 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData, states: No
                 NowPlayingControlsLayout.Traditional -> NowPlayingTraditionalControls(
                     context,
                     data = data,
+                    states = states,
                 )
             }
             Spacer(modifier = Modifier.height(defaultHorizontalPadding + 8.dp))
@@ -279,7 +281,7 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData, states: No
 }
 
 @Composable
-fun NowPlayingTraditionalControls(context: ViewContext, data: NowPlayingData) {
+fun NowPlayingTraditionalControls(context: ViewContext, data: NowPlayingData, states: NowPlayingStates) {
     Row(
         modifier = Modifier
             .padding(defaultHorizontalPadding, 0.dp)
@@ -325,6 +327,7 @@ fun NowPlayingTraditionalControls(context: ViewContext, data: NowPlayingData) {
             style = NowPlayingControlButtonStyle(
                 color = NowPlayingControlButtonColors.Transparent,
             ),
+            states = states,
         )
     }
 }
@@ -533,12 +536,16 @@ private fun NowPlayingSkipNextButton(
     context: ViewContext,
     data: NowPlayingData,
     style: NowPlayingControlButtonStyle,
+    states: NowPlayingStates,
 ) {
     data.run {
         NowPlayingControlButton(
             style = style,
             icon = Icons.Filled.SkipNext,
             onClick = {
+                if (context.symphony.radio.quizMode) {
+                    states.showSongInfo.value = false
+                }
                 context.symphony.radio.shorty.skip()
             }
         )

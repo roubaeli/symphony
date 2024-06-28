@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -29,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
+import androidx.compose.material.icons.filled.HideImage
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
@@ -111,6 +113,7 @@ fun NowPlayingBottomBar(context: ViewContext, insetPadding: Boolean = true) {
     val showSeekControls by context.symphony.settings.miniPlayerSeekControls.collectAsState()
     val seekBackDuration by context.symphony.settings.seekBackDuration.collectAsState()
     val seekForwardDuration by context.symphony.settings.seekForwardDuration.collectAsState()
+    val isQuiz by context.symphony.radio.observatory.quizMode.collectAsState()
 
     AnimatedContent(
         modifier = Modifier.fillMaxWidth(),
@@ -175,13 +178,22 @@ fun NowPlayingBottomBar(context: ViewContext, insetPadding: Boolean = true) {
                                 from togetherWith to
                             },
                         ) { song ->
-                            AsyncImage(
-                                song.createArtworkImageRequest(context.symphony).build(),
-                                null,
-                                modifier = Modifier
-                                    .size(45.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                            )
+                            when (isQuiz) {
+                                false -> AsyncImage(
+                                    song.createArtworkImageRequest(context.symphony).build(),
+                                    null,
+                                    modifier = Modifier
+                                        .size(45.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                )
+                                true -> Image(
+                                    imageVector = Icons.Filled.HideImage,
+                                    null,
+                                    modifier = Modifier
+                                        .size(45.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                )
+                            }
                         }
                         Spacer(modifier = Modifier.width(15.dp))
                         AnimatedContent(
@@ -199,7 +211,7 @@ fun NowPlayingBottomBar(context: ViewContext, insetPadding: Boolean = true) {
                                 from togetherWith to
                             },
                         ) { song ->
-                            NowPlayingBottomBarContent(context, song = song)
+                            NowPlayingBottomBarContent(context, song = song, isQuiz = isQuiz)
                         }
                         Spacer(modifier = Modifier.width(15.dp))
                         if (showTrackControls) {
@@ -259,7 +271,7 @@ fun NowPlayingBottomBar(context: ViewContext, insetPadding: Boolean = true) {
 }
 
 @Composable
-private fun NowPlayingBottomBarContent(context: ViewContext, song: Song) {
+private fun NowPlayingBottomBarContent(context: ViewContext, song: Song, isQuiz: Boolean) {
     BoxWithConstraints(modifier = Modifier.clipToBounds()) {
         val cardWidthPx = constraints.maxWidth
         var offsetX by remember { mutableFloatStateOf(0f) }
@@ -300,13 +312,13 @@ private fun NowPlayingBottomBarContent(context: ViewContext, song: Song) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 NowPlayingBottomBarContentText(
                     context,
-                    song.title,
+                    if (!isQuiz) song.title else "<Title>",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 if (song.artists.isNotEmpty()) {
                     NowPlayingBottomBarContentText(
                         context,
-                        song.artists.joinToString(),
+                        if (!isQuiz) song.artists.joinToString() else "<Artist>",
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }

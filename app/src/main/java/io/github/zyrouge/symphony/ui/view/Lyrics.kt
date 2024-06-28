@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -34,12 +35,19 @@ import io.github.zyrouge.symphony.ui.view.nowPlaying.NothingPlaying
 import io.github.zyrouge.symphony.ui.view.nowPlaying.NowPlayingSeekBar
 import io.github.zyrouge.symphony.ui.view.nowPlaying.NowPlayingTraditionalControls
 import io.github.zyrouge.symphony.ui.view.nowPlaying.defaultHorizontalPadding
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LyricsView(context: ViewContext) {
     BackHandler {
         context.navController.popBackStack()
+    }
+    val states = remember {
+        NowPlayingStates(
+            showLyrics = MutableStateFlow(NowPlayingDefaults.showLyrics),
+            showSongInfo = MutableStateFlow(context.symphony.radio.quizMode)
+        )
     }
 
     NowPlayingWithData(context) { data ->
@@ -109,7 +117,7 @@ fun LyricsView(context: ViewContext) {
                         Spacer(modifier = Modifier.height(defaultHorizontalPadding + 8.dp))
                         NowPlayingSeekBar(context)
                         Spacer(modifier = Modifier.height(defaultHorizontalPadding + 8.dp))
-                        NowPlayingTraditionalControls(context, data = data)
+                        NowPlayingTraditionalControls(context, data = data, states = states)
                         Spacer(modifier = Modifier.height(defaultHorizontalPadding + 8.dp))
                     }
 
