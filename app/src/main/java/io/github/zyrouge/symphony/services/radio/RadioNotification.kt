@@ -2,6 +2,9 @@ package io.github.zyrouge.symphony.services.radio
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.Bitmap
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.HideImage
 import androidx.core.app.NotificationCompat
 import io.github.zyrouge.symphony.MainActivity
 import io.github.zyrouge.symphony.R
@@ -35,9 +38,11 @@ class RadioNotification(private val symphony: Symphony) {
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                 )
             )
-            setContentTitle(req.song.title)
-            setContentText(req.song.artists.joinToString(", "))
-            setLargeIcon(req.artworkBitmap)
+            setContentTitle(if (req.isQuiz) "<Title>" else req.song.title)
+            setContentText(if (req.isQuiz) "<Artist>" else req.song.artists.joinToString(", "))
+            if (!req.isQuiz) {
+                setLargeIcon(req.artworkBitmap)
+            }
             setOngoing(req.isPlaying)
             addAction(
                 createAction(

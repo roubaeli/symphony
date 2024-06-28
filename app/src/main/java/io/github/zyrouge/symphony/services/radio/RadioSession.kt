@@ -26,6 +26,7 @@ data class RadioSessionUpdateRequest(
     val artworkBitmap: Bitmap,
     val playbackPosition: PlaybackPosition,
     val isPlaying: Boolean,
+    val isQuiz: Boolean,
 )
 
 class RadioSession(val symphony: Symphony) {
@@ -232,6 +233,7 @@ class RadioSession(val symphony: Symphony) {
             artworkBitmap = artworkBitmap,
             playbackPosition = playbackPosition,
             isPlaying = isPlaying,
+            isQuiz = symphony.radio.quizMode,
         )
         if (currentSongId != song.id) return
 
@@ -244,24 +246,24 @@ class RadioSession(val symphony: Symphony) {
         mediaSession.run {
             setMetadata(
                 MediaMetadataCompat.Builder().run {
-                    putString(MediaMetadataCompat.METADATA_KEY_TITLE, req.song.title)
+                    putString(MediaMetadataCompat.METADATA_KEY_TITLE, if (req.isQuiz) "<Title>" else req.song.title)
                     if (req.song.artists.isNotEmpty()) {
                         putString(
                             MediaMetadataCompat.METADATA_KEY_ARTIST,
-                            req.song.artists.joinToString()
+                            if (req.isQuiz) "<Artist>" else  req.song.artists.joinToString()
                         )
                     }
-                    putString(MediaMetadataCompat.METADATA_KEY_ALBUM, req.song.album)
-                    req.artworkUriString.let {
-                        putString(MediaMetadataCompat.METADATA_KEY_ART_URI, it)
-                        putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, it)
-                        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, it)
-                    }
-                    req.artworkBitmap.let {
-                        putBitmap(MediaMetadataCompat.METADATA_KEY_ART, it)
-                        putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, it)
-                        putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, it)
-                    }
+                    putString(MediaMetadataCompat.METADATA_KEY_ALBUM, if (req.isQuiz) "<Album>" else  req.song.album)
+//                    req.artworkUriString.let {
+//                        putString(MediaMetadataCompat.METADATA_KEY_ART_URI, it)
+//                        putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, it)
+//                        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, it)
+//                    }
+//                    req.artworkBitmap.let {
+//                        putBitmap(MediaMetadataCompat.METADATA_KEY_ART, it)
+//                        putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, it)
+//                        putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, it)
+//                    }
                     putLong(
                         MediaMetadataCompat.METADATA_KEY_DURATION,
                         req.playbackPosition.total.toLong()
