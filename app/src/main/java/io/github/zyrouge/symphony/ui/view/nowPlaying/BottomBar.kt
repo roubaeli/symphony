@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.automirrored.outlined.Article
+import androidx.compose.material.icons.filled.Brightness6
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.MotionPhotosPaused
 import androidx.compose.material.icons.filled.Repeat
@@ -36,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +46,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.zyrouge.symphony.services.radio.RadioLoopMode
@@ -74,6 +77,20 @@ fun NowPlayingBodyBottomBar(
     var showSpeedDialog by remember { mutableStateOf(false) }
     var showPitchDialog by remember { mutableStateOf(false) }
     var showExtraOptions by remember { mutableStateOf(false) }
+    var keepScreenOn by remember { mutableStateOf(false) }
+    val currentView = LocalView.current
+    if (keepScreenOn) {
+        DisposableEffect(Unit) {
+            currentView.keepScreenOn = true
+            onDispose {
+                currentView.keepScreenOn = false
+            }
+        }
+    } else {
+        if (currentView.keepScreenOn) {
+            currentView.keepScreenOn = false
+        }
+    }
 
     data.run {
         Row(
@@ -106,31 +123,46 @@ fun NowPlayingBodyBottomBar(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            states.showLyrics.let { showLyricsState ->
-                val showLyrics by showLyricsState.collectAsState()
+            if (showSongInfo) {
+                states.showLyrics.let { showLyricsState ->
+                    val showLyrics by showLyricsState.collectAsState()
 
-                IconButton(
-                    onClick = {
-                        when (lyricsLayout) {
-                            NowPlayingLyricsLayout.ReplaceArtwork -> {
-                                val nShowLyrics = !showLyricsState.value
-                                showLyricsState.value = nShowLyrics
-                                NowPlayingDefaults.showLyrics = nShowLyrics
-                            }
+                    IconButton(
+                        onClick = {
+                            when (lyricsLayout) {
+                                NowPlayingLyricsLayout.ReplaceArtwork -> {
+                                    val nShowLyrics = !showLyricsState.value
+                                    showLyricsState.value = nShowLyrics
+                                    NowPlayingDefaults.showLyrics = nShowLyrics
+                                }
 
-                            NowPlayingLyricsLayout.SeparatePage -> {
-                                context.navController.navigate(Routes.Lyrics)
+                                NowPlayingLyricsLayout.SeparatePage -> {
+                                    context.navController.navigate(Routes.Lyrics)
+                                }
                             }
                         }
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.Article,
+                            null,
+                            tint = when {
+                                showLyrics -> MaterialTheme.colorScheme.primary
+                                else -> LocalContentColor.current
+                            }
+                        )
+                    }
+                }
+            } else {
+                IconButton(
+                    onClick = {
+                        keepScreenOn = !keepScreenOn
                     }
                 ) {
                     Icon(
-                        Icons.AutoMirrored.Outlined.Article,
+                        Icons.Filled.Brightness6,
                         null,
-                        tint = when {
-                            showLyrics -> MaterialTheme.colorScheme.primary
-                            else -> LocalContentColor.current
-                        }
+                        tint = if (!keepScreenOn) LocalContentColor.current
+                        else MaterialTheme.colorScheme.primary
                     )
                 }
             }
