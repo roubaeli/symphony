@@ -543,7 +543,7 @@ private fun NowPlayingSkipNextButton(
             style = style,
             icon = Icons.Filled.SkipNext,
             onClick = {
-                if (context.symphony.radio.quizMode) {
+                if (context.symphony.radio.queue.currentQuizMode) {
                     states.showSongInfo.value = false
                 }
                 context.symphony.radio.shorty.skip()

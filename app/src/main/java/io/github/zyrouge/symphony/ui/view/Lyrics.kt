@@ -46,7 +46,7 @@ fun LyricsView(context: ViewContext) {
     val states = remember {
         NowPlayingStates(
             showLyrics = MutableStateFlow(NowPlayingDefaults.showLyrics),
-            showSongInfo = MutableStateFlow(context.symphony.radio.quizMode)
+            showSongInfo = MutableStateFlow(context.symphony.radio.queue.currentQuizMode)
         )
     }
 
