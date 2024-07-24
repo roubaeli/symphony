@@ -23,6 +23,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -64,7 +66,7 @@ fun NowPlayingBodyCover(
             if (targetStateShowLyrics) {
                 NowPlayingBodyCoverLyrics(context, orientation)
             } else {
-                NowPlayingBodyCoverArtwork(context, data.song, showCover)
+                NowPlayingBodyCoverArtwork(context, data.song, states)
             }
         }
     }
@@ -100,7 +102,8 @@ private fun NowPlayingBodyCoverLyrics(context: ViewContext, orientation: ScreenO
 }
 
 @Composable
-private fun NowPlayingBodyCoverArtwork(context: ViewContext, song: Song, showCover: Boolean) {
+private fun NowPlayingBodyCoverArtwork(context: ViewContext, song: Song, states: NowPlayingStates) {
+    val showCover by states.showSongInfo.collectAsState()
     BoxWithConstraints {
         val dimension = min(maxHeight, maxWidth)
 
@@ -153,6 +156,7 @@ private fun NowPlayingBodyCoverArtwork(context: ViewContext, song: Song, showCov
                     imageVector = Icons.Filled.HideImage,
                     null,
                     contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(LocalContentColor.current),
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(12.dp))
@@ -171,13 +175,7 @@ private fun NowPlayingBodyCoverArtwork(context: ViewContext, song: Song, showCov
                         )
                         .pointerInput(Unit) {
                             detectTapGestures { _ ->
-                                context.symphony.groove.album
-                                    .getIdFromSong(song)
-                                    ?.let {
-                                        context.navController.navigate(
-                                            Routes.Album.build(it)
-                                        )
-                                    }
+                                states.showSongInfo.value = true
                             }
                         }
                 )
