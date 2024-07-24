@@ -71,7 +71,7 @@ class Radio(private val symphony: Symphony) : SymphonyHooks {
     var persistedPitch: Float = RadioPlayer.DEFAULT_PITCH
     var sleepTimer: RadioSleepTimer? = null
     var pauseOnCurrentSongEnd = false
-    var quizMode = false
+    //var quizMode = false
 
     init {
         nativeReceiver.start()
@@ -287,12 +287,6 @@ class Radio(private val symphony: Symphony) : SymphonyHooks {
         onUpdate.dispatch(RadioEvents.PauseOnCurrentSongEndChanged)
     }
 
-    @JvmName("setQuizModeTo")
-    fun setQuizMode(value: Boolean) {
-        quizMode = value
-        onUpdate.dispatch(RadioEvents.QuizModeChanged)
-    }
-
     private fun stopCurrentSong() {
         player?.let {
             player = null
@@ -310,7 +304,7 @@ class Radio(private val symphony: Symphony) : SymphonyHooks {
     }
 
     private fun onSongFinish(source: SongFinishSource) {
-        if (!quizMode) {
+        if (!queue.currentQuizMode) {
             stopCurrentSong()
             if (queue.isEmpty()) {
                 queue.currentSongIndex = -1
@@ -404,6 +398,7 @@ class Radio(private val symphony: Symphony) : SymphonyHooks {
                     originalQueue = originalQueue,
                     currentQueue = currentQueue,
                     shuffled = previous.shuffled,
+                    quizMode = previous.quizMode,
                 )
             )
         }

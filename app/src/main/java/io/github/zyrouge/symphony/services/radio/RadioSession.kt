@@ -225,6 +225,7 @@ class RadioSession(val symphony: Symphony) {
         val playbackPosition = symphony.radio.currentPlaybackPosition
             ?: PlaybackPosition(played = 0L, total = song.duration)
         val isPlaying = symphony.radio.isPlaying
+        val isQuiz = symphony.radio.queue.currentQuizMode
 
         val req = RadioSessionUpdateRequest(
             song = song,
@@ -233,7 +234,7 @@ class RadioSession(val symphony: Symphony) {
             artworkBitmap = artworkBitmap,
             playbackPosition = playbackPosition,
             isPlaying = isPlaying,
-            isQuiz = symphony.radio.quizMode,
+            isQuiz = isQuiz,
         )
         if (currentSongId != song.id) return
 

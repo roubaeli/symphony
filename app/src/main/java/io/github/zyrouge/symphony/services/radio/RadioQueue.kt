@@ -29,6 +29,12 @@ class RadioQueue(private val symphony: Symphony) {
             symphony.radio.onUpdate.dispatch(RadioEvents.ShuffleModeChanged)
         }
 
+    var currentQuizMode = false
+        set(value) {
+            field = value
+            symphony.radio.onUpdate.dispatch(RadioEvents.QuizModeChanged)
+        }
+
     var currentLoopMode = RadioLoopMode.None
         set(value) {
             field = value
@@ -119,6 +125,11 @@ class RadioQueue(private val symphony: Symphony) {
         setLoopMode(RadioLoopMode.all[if (next < RadioLoopMode.all.size) next else 0])
     }
 
+    fun toggleQuizMode() = setQuizMode(!currentQuizMode)
+    fun setQuizMode(to: Boolean) {
+        currentQuizMode = to
+    }
+
     fun toggleShuffleMode() = setShuffleMode(!currentShuffleMode)
     fun setShuffleMode(to: Boolean) {
         currentShuffleMode = to
@@ -147,6 +158,7 @@ class RadioQueue(private val symphony: Symphony) {
         val originalQueue: List<Long>,
         val currentQueue: List<Long>,
         val shuffled: Boolean,
+        val quizMode: Boolean,
     ) {
         fun serialize() =
             listOf(
@@ -155,6 +167,7 @@ class RadioQueue(private val symphony: Symphony) {
                 originalQueue.joinToString(","),
                 currentQueue.joinToString(","),
                 shuffled.toString(),
+                quizMode.toString(),
             ).joinToString(";")
 
         companion object {
@@ -165,6 +178,7 @@ class RadioQueue(private val symphony: Symphony) {
                     originalQueue = queue.originalQueue.toList(),
                     currentQueue = queue.currentQueue.toList(),
                     shuffled = queue.currentShuffleMode,
+                    quizMode = queue.currentQuizMode,
                 )
 
             fun parse(data: String): Serialized? {
@@ -176,6 +190,7 @@ class RadioQueue(private val symphony: Symphony) {
                         originalQueue = semi[2].split(",").map { it.toLong() },
                         currentQueue = semi[3].split(",").map { it.toLong() },
                         shuffled = semi[4].toBoolean(),
+                        quizMode = semi[5].toBoolean(),
                     )
                 } catch (_: Exception) {
                 }
@@ -193,6 +208,7 @@ class RadioQueue(private val symphony: Symphony) {
             currentQueue.addAll(serialized.currentQueue)
             symphony.radio.onUpdate.dispatch(RadioEvents.QueueModified)
             currentShuffleMode = serialized.shuffled
+            currentQuizMode = serialized.quizMode
             afterAdd(
                 Radio.PlayOptions(
                     index = serialized.currentSongIndex,

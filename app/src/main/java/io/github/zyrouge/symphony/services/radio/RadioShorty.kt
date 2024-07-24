@@ -66,7 +66,7 @@ class RadioShorty(private val symphony: Symphony) {
                 }
         )
         symphony.radio.queue.setShuffleMode(shuffle)
-        symphony.radio.setQuizMode(quiz)
+        symphony.radio.queue.setQuizMode(quiz)
     }
 
     fun playQueue(

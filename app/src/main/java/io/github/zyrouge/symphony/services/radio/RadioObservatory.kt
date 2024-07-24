@@ -110,7 +110,7 @@ class RadioObservatory(private val symphony: Symphony) {
     }
 
     private fun emitQuizMode() = _quizMode.update {
-        symphony.radio.quizMode
+        symphony.radio.queue.currentQuizMode
     }
 
     private fun emitSleepTimer() = _sleepTimer.update {
